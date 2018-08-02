@@ -1,0 +1,32 @@
+.loginButton {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #1db954;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 28px;
+  padding: 20px;
+  width: 200px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.welcomePage {
+  text-align: center;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%
+}
+
+.mainPage {
+  text-align: center;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%
+}
+
+.display-linebreak {
+  white-space: pre-line;
+}
