@@ -155,7 +155,15 @@ class App extends Component {
 
   handleRestartClick() {
     console.log('Emptying Blender and restarting...');
-    //this.setState()
+    // clear other users
+    // TODO: refresh token first and then update
+    this.setState({
+      ready: false,
+      other_user : '',
+      all_user_names : [this.state.all_user_names[0]],
+      all_users : [this.state.all_users[0]],
+      song_list : []
+    })
   }
 
   render() {
