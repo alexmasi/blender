@@ -105,18 +105,18 @@ router.get('/users/:userEmail', (req, res) => {
   })
 });
 
-// router.put('/users/:userEmail', (req, res) => {
-//   User.findOneAndUpdate(
-//     {userEmail : req.params.userEmail},
-//     {refreshToken : req.body.refreshToken})
-//   .then(function(err, user) {
-//     if (err) {
-//       res.send(err)
-//     } else {
-//       res.json(user)
-//     }
-//   })
-// });
+router.put('/users/:userEmail', (req, res) => {
+  User.findOneAndUpdate(
+    {userEmail : req.params.userEmail},
+    {refreshToken : req.body.refreshToken})
+  .then(function(err, user) {
+    if (err) {
+      res.send(err)
+    } else {
+      res.json(user)
+    }
+  })
+});
 
 router.delete('/users/:userEmail', (req, res) => {
   User.findOneAndDelete({userEmail : req.params.userEmail})

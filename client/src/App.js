@@ -79,20 +79,32 @@ class App extends Component {
           axios.get(`/api/users/${data.email}`)
             .then((response) => {
               console.log(response);
-              if (response.error) {
+              if (response.data.error) {
                 console.log(`New user: ${data.email}`)
                 axios.post('/api/users', {
                     userEmail: data.email,
                     refreshToken: parsed.refresh_token
                   })
+                    .then((response) => {
+                      console.log(`Added new user: ${data.email}`);
+                      console.log(response);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+              } else {
+                console.log(`Existing user: ${data.email}`);
+                console.log('Updating user refresh token in database...');
+                axios.put(`/api/users/${data.email}`, {
+                  refreshToken: parsed.refresh_token
+                })
                   .then((response) => {
+                    console.log(`Updated existing user: ${data.email}`);
                     console.log(response);
                   })
                   .catch((error) => {
                     console.log(error);
                   });
-              } else {
-                console.log(`Existing user: ${data.email}`)
               }
             })
             .catch((error) => {
