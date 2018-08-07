@@ -21,17 +21,41 @@ const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 const redirectUri = process.env.REDIRECT_URI
 
-// schema object that shows the shape of your database entries.
-// const UsersSchema = new mongoose.Schema({
-//   userID: String,
-//   accesToken: String,
-//   refreshToken: String
-// });
-
 // db config -- set your URI from mLab in secrets.js
-// mongoose.connect(dbUri);
-// var db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+mongoose.connect(dbUri, { useNewUrlParser: true });
+mongoose.Promise = require('bluebird');
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+// schema object that shows the shape of your database entries.
+const userSchema = new mongoose.Schema({
+  userEmail: {
+    type : String,
+    unique : true,
+    required : true,
+    validate: {
+      validator: function(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+      },
+      message: '{VALUE} is not a valid email address'
+    }
+  },
+  refreshToken: {type : String,
+    required : true,
+    validate: {
+      validator: function(token) {
+        var re = /^[a-zA-Z0-9-_]+$/;
+        return re.test(String(token).toLowerCase());
+      },
+      message: '{VALUE} is not a valid token'
+    }
+  }
+},{
+  timestamps: true
+});
+
+const User = mongoose.model('User', userSchema);
 
 // now we should configure the API to use bodyParser and look for JSON data in the request body
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -50,19 +74,59 @@ router.get('/', (req, res) => {
 });
 
 router.get('/users', (req, res) => {
-  // TODO
+  User.find({}).then(eachOne => {
+    res.json(eachOne);
+  })
 });
 
 router.post('/users', (req, res) => {
-  // TODO
+  User.create(
+    {userEmail: req.body.userEmail,
+    refreshToken: req.body.refreshToken})
+  .then(function(err, user) {
+    if (err) {
+      res.send(err)
+    } else {
+      res.json(user)
+    }
+  })
 });
 
-router.put('/users/:userId', (req, res) => {
-  // TODO
+router.get('/users/:userEmail', (req, res) => {
+  User.findOne({userEmail : req.params.userEmail})
+  .then(function(err, user) {
+    if (err) {
+      res.send(err)
+    } else if (!user) {
+      res.json({error : 'user not found'})
+    } else {
+      res.json(user)
+    }
+  })
 });
 
-router.delete('/users/:userId', (req, res) => {
-  // TODO
+// router.put('/users/:userEmail', (req, res) => {
+//   User.findOneAndUpdate(
+//     {userEmail : req.params.userEmail},
+//     {refreshToken : req.body.refreshToken})
+//   .then(function(err, user) {
+//     if (err) {
+//       res.send(err)
+//     } else {
+//       res.json(user)
+//     }
+//   })
+// });
+
+router.delete('/users/:userEmail', (req, res) => {
+  User.findOneAndDelete({userEmail : req.params.userEmail})
+  .then(function(err, user) {
+    if (err) {
+      res.send(err)
+    } else {
+      res.json({success : 'user deleted'})
+    }
+  })
 });
 
 
@@ -80,7 +144,7 @@ var generateRandomString = function(length) {
 
 var stateKey = 'spotify_auth_state';
 
-app.get('/login', function(req, res) {
+router.get('/login', function(req, res) {
 
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
@@ -99,7 +163,7 @@ app.get('/login', function(req, res) {
 
 });
 
-app.get('/callback', function(req, res) {
+router.get('/callback', function(req, res) {
 
   // your application requests refresh and access tokens
   // after checking the state parameter
@@ -145,6 +209,29 @@ app.get('/callback', function(req, res) {
       }
     });
   }
+});
+
+router.get('/refresh_token/:token', (req, res) => {
+  // requesting access token from refresh token
+  var refresh_token = req.params.token;
+  var authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    headers: { 'Authorization': 'Basic ' + (new Buffer(clientId + ':' + clientSecret).toString('base64')) },
+    form: {
+      grant_type: 'refresh_token',
+      refresh_token: refresh_token
+    },
+    json: true
+  };
+
+  request.post(authOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      var access_token = body.access_token;
+      res.send({
+        'access_token': access_token
+      });
+    }
+  });
 });
 
 
