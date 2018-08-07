@@ -178,6 +178,32 @@ class App extends Component {
     })
   }
 
+  handleDeleteClick() {
+    console.log('Removing current user from Blender and returning to login page...');
+    // DELETE current user from database
+    axios.delete(`/api/users/${this.state.user_data.email}`)
+      .then((response) => {
+        console.log(response.data.success);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    // reset state
+    this.setState({
+      loggedIn : false,
+      user_data : {},
+      access_token : '',
+      refresh_token : '',
+      other_user : '',
+      all_user_names : [],
+      all_users : [],
+      song_list : [],
+      ready : false,
+    });
+    // clear tokens from url
+    window.location = 'http://localhost:3000';
+  }
+
   render() {
     return (
       <div>
@@ -197,6 +223,9 @@ class App extends Component {
             </button>
             <button className="loginButton" onClick={() => this.handleRestartClick()}>
               Restart
+            </button>
+            <button className="loginButton" onClick={() => this.handleDeleteClick()}>
+              Delete my Blender account
             </button>
 
             {this.state.ready &&
