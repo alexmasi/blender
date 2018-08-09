@@ -6,6 +6,7 @@ var request = require('request');
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+var PythonShell = require('python-shell');
 
 
 // create our instances
@@ -231,6 +232,27 @@ router.get('/refresh_token/:token', (req, res) => {
         'access_token': access_token
       });
     }
+  });
+});
+
+
+// RUN PYTHON SCRIPT
+
+router.post('/blend', (req, res) => {
+  console.log(req.body.song_data);
+  var options = {
+    mode: 'text',
+    // pythonPath: 'path/to/python',
+    // pythonOptions: ['-u'], // get print results in real-time
+    // scriptPath: 'path/to/my/scripts',
+    args: [req.body.song_data]
+  };
+
+  PythonShell.run('blend.py', options, function (err, results) {
+    if (err) throw err;
+    // results is an array consisting of messages collected during execution
+    console.log('results: %j', results);
+    res.json({success: results});
   });
 });
 
