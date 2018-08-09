@@ -124,45 +124,106 @@ class App extends Component {
     event.preventDefault();
     var name = this.state.other_user;
     console.log('A name was submitted: ' + name);
-    // get user info from database
-    axios.get(`/api/users/${name}`)
-      .then((response) => {
-        if (!response.data.error) {
-          // user exists so get access token from refresh token
-          console.log(`Returning ${name}'s refresh token`);
-          var refresh_token = response.data.refreshToken;
-          console.log(response);
-          console.log(refresh_token);
-          axios.get(`/api/refresh_token/${refresh_token}`)
-            .then((response) => {
-              // received access token so store it in state
-              console.log(response);
-              var token = response.data.access_token;
-              console.log(`token is: ${token}`);
-              this.setState({all_users : this.state.all_users.concat({user: name, token: token})});
-              this.setState({all_user_names : this.state.all_user_names.concat(name)});
-              console.log('Updated state!');
-              console.log(this.state);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        } else {
-          console.log(`${name} is not signed up for Blender, try another user`);
-          alert(`${name} is not signed up for Blender, try another user`);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (!name) {
+      console.log('Enter valid user email');
+      alert('Enter valid user email');
+    } else {
+      // get user info from database
+      axios.get(`/api/users/${name}`)
+        .then((response) => {
+          if (!response.data.error) {
+            // user exists so get access token from refresh token
+            console.log(`Returning ${name}'s refresh token`);
+            var refresh_token = response.data.refreshToken;
+            console.log(response);
+            console.log(refresh_token);
+            axios.get(`/api/refresh_token/${refresh_token}`)
+              .then((response) => {
+                // received access token so store it in state
+                console.log(response);
+                var token = response.data.access_token;
+                console.log(`token is: ${token}`);
+                this.setState({all_users : this.state.all_users.concat({user: name, token: token})});
+                this.setState({all_user_names : this.state.all_user_names.concat(name)});
+                console.log('Updated state!');
+                console.log(this.state);
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          } else {
+            console.log(`${name} is not signed up for Blender, try another user`);
+            alert(`${name} is not signed up for Blender, try another user`);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
     // dont wait to clear other_user field and reset event target
     this.setState({other_user : ''});
     event.target.reset();
   }
 
+  callPythonScript() {
+    var songs = this.state.song_list;
+    console.log(songs);
+    axios.post('/api/blend', {
+        song_data: songs
+      })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+  }
+
   handleBlendClick() {
     console.log('Blending users: ' + this.state.all_user_names.join(', '));
     this.setState({ready : true});
+    var users_processed = 0;
+    this.state.all_users.forEach((entry) => {
+      var user_songs = [];
+      spotifyApi.setAccessToken(entry.token);
+      // get top tracks
+      spotifyApi.getMyTopTracks()
+        .then((data) => {
+          data.items.forEach((track) => {
+            // get attr for each
+            spotifyApi.getAudioFeaturesForTrack(track.uri.split(':')[2]) // remove header from uri
+              .then((attr) => {
+                user_songs.push({
+                  uri: track.uri,
+                  acousticness: attr.acousticness,
+                  danceability: attr.danceability,
+                  energy: attr.energy,
+                  instrumentalness: attr.instrumentalness,
+                  key: attr.key,
+                  liveness: attr.liveness,
+                  loudness: attr.loudness,
+                  mode: attr.mode,
+                  speechiness: attr.speechiness,
+                  tempo: attr.tempo,
+                  valence: attr.valence
+                });
+              });
+              console.log(`Done with track: ${track.uri}`)
+            })
+        })
+        .then(() => {
+          console.log(`Done gathering ${entry.user}'s tracks`);
+          this.setState({song_list : this.state.song_list.concat({user: entry.user, songs: user_songs})});
+          if (++users_processed === this.state.all_users.length) {
+            this.callPythonScript();
+          }
+        }, (err) => {
+          console.error(err);
+        });
+    });
+    // axios call backend method to run python script on song_list after finishing all loops of prev
+    // after return create a new playlist and add all returned songs
+    // update playlist_uri in state
   }
 
   handleRestartClick() {
@@ -221,12 +282,6 @@ class App extends Component {
             <button className="loginButton" onClick={() => this.handleBlendClick()}>
               Blend!
             </button>
-            <button className="loginButton" onClick={() => this.handleRestartClick()}>
-              Restart
-            </button>
-            <button className="loginButton" onClick={() => this.handleDeleteClick()}>
-              Delete my Blender account
-            </button>
 
             {this.state.ready &&
               <div>
@@ -234,6 +289,12 @@ class App extends Component {
                 <p>Playlist added to your library!</p>
               </div>
             }
+            <button className="loginButton" onClick={() => this.handleRestartClick()}>
+              Restart
+            </button>
+            <button className="loginButton" onClick={() => this.handleDeleteClick()}>
+              Delete my Blender account
+            </button>
 
           </div> :
           // if not logged in then render the welcome page
