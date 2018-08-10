@@ -110,7 +110,8 @@ class App extends Component {
             .catch((error) => {
               console.log(error);
             });
-        }, (err) => {
+        })
+        .catch((err) => {
           console.error(err);
         });
     }
@@ -166,10 +167,8 @@ class App extends Component {
   }
 
   callPythonScript() {
-    var songs = this.state.song_list;
-    console.log(songs);
     axios.post('/api/blend', {
-        song_data: songs
+        song_data: JSON.stringify(this.state.song_list)
       })
         .then((response) => {
           console.log(response);
@@ -184,47 +183,36 @@ class App extends Component {
     this.setState({ready : true});
     var users_processed = 0;
     this.state.all_users.forEach((entry) => {
-      var user_songs = [];
       spotifyApi.setAccessToken(entry.token);
       // get top tracks
       spotifyApi.getMyTopTracks()
         .then((data) => {
-          data.items.forEach((track) => {
-            // get attr for each
-            spotifyApi.getAudioFeaturesForTrack(track.uri.split(':')[2]) // remove header from uri
-              .then((attr) => {
-                user_songs.push({
-                  uri: track.uri,
-                  acousticness: attr.acousticness,
-                  danceability: attr.danceability,
-                  energy: attr.energy,
-                  instrumentalness: attr.instrumentalness,
-                  key: attr.key,
-                  liveness: attr.liveness,
-                  loudness: attr.loudness,
-                  mode: attr.mode,
-                  speechiness: attr.speechiness,
-                  tempo: attr.tempo,
-                  valence: attr.valence
-                });
-              });
-              console.log(`Done with track: ${track.uri}`)
-            })
+          return data.items.map((t) => { return t.id; });
         })
-        .then(() => {
-          console.log(`Done gathering ${entry.user}'s tracks`);
-          this.setState({song_list : this.state.song_list.concat({user: entry.user, songs: user_songs})});
+        .then((trackIds) => {
+          return spotifyApi.getAudioFeaturesForTracks(trackIds);
+        })
+        .then((tracksInfo) => {
+          this.setState({
+            song_list : this.state.song_list.concat({
+              user: entry.user,
+              songs: tracksInfo.audio_features
+            })
+          });
           if (++users_processed === this.state.all_users.length) {
+            // call backend method to run python script
             this.callPythonScript();
           }
-        }, (err) => {
-          console.error(err);
+        })
+        .catch((error) => {
+          console.error(error);
         });
     });
-    // axios call backend method to run python script on song_list after finishing all loops of prev
     // after return create a new playlist and add all returned songs
     // update playlist_uri in state
   }
+
+
 
   handleRestartClick() {
     console.log('Emptying Blender and restarting...');
