@@ -57,7 +57,8 @@ class App extends Component {
       all_users : [],
       song_list : [],
       ready : false,
-      playlist_uri : 'spotify:user:spotify:playlist:37i9dQZF1E9HuBAP29LsBO'
+      playlist_uri : '',
+      playlist_id : ''
     };
   }
 
@@ -171,7 +172,10 @@ class App extends Component {
         song_data: JSON.stringify(this.state.song_list)
       })
         .then((response) => {
-          console.log(response);
+          return spotifyApi.addTracksToPlaylist(this.state.user_data.id, this.state.playlist_id, response.data.uris[0])
+        })
+        .then(() => {
+          this.setState({ready : true});
         })
         .catch((error) => {
           console.log(error);
@@ -180,12 +184,11 @@ class App extends Component {
 
   handleBlendClick() {
     console.log('Blending users: ' + this.state.all_user_names.join(', '));
-    this.setState({ready : true});
     var users_processed = 0;
     this.state.all_users.forEach((entry) => {
       spotifyApi.setAccessToken(entry.token);
       // get top tracks
-      spotifyApi.getMyTopTracks()
+      spotifyApi.getMyTopTracks({limit: 20, time_range: 'medium_term'})
         .then((data) => {
           return data.items.map((t) => { return t.id; });
         })
@@ -199,6 +202,15 @@ class App extends Component {
               songs: tracksInfo.audio_features
             })
           });
+          spotifyApi.setAccessToken(this.state.access_token);
+          return spotifyApi.createPlaylist(this.state.user_data.id, {
+            name : `Blender - ${this.state.all_user_names.join(', ')} [Medium_term]`,
+            description : 'Playlist created by Blender for Spotify'
+          });
+        })
+        .then((playlist) => {
+          this.setState({playlist_uri : playlist.uri});
+          this.setState({playlist_id: playlist.id});
           if (++users_processed === this.state.all_users.length) {
             // call backend method to run python script
             this.callPythonScript();

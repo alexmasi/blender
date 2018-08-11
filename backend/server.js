@@ -151,7 +151,7 @@ router.get('/login', function(req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  var scope = 'user-top-read user-read-private user-read-email';
+  var scope = 'user-top-read user-read-private user-read-email playlist-modify-public';
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',
@@ -239,9 +239,8 @@ router.get('/refresh_token/:token', (req, res) => {
 // RUN PYTHON SCRIPT
 
 router.post('/blend', (req, res) => {
-  console.log(req.body.song_data);
   var options = {
-    mode: 'text',
+    mode: 'json',
     // pythonPath: 'path/to/python',
     // pythonOptions: ['-u'], // get print results in real-time
     // scriptPath: 'path/to/my/scripts',
@@ -251,8 +250,8 @@ router.post('/blend', (req, res) => {
   PythonShell.run('blend.py', options, function (err, results) {
     if (err) throw err;
     // results is an array consisting of messages collected during execution
-    console.log('results: %j', results);
-    res.json({success: results});
+    console.log('uris: %j', results);
+    res.json({uris: results});
   });
 });
 
