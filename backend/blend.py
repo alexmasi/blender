@@ -42,8 +42,8 @@ for i in range(len(tracks)-1):
         break
 
 
-# fig = plt.figure(figsize=(25, 10))
-# dn = dendrogram(Z)
+# fig = plt.figure(figsize=(15, 5))
+# dn = dendrogram(Z, labels=tracks_uri)
 # plt.show()
 
 for cluster in cluster_list:
@@ -52,7 +52,8 @@ for cluster in cluster_list:
         cluster_list.append(int(Z[prev_cluster, 0]))
         cluster_list.append(int(Z[prev_cluster, 1]))
 
-final_tracks = [tracks_uri[cluster] for cluster in cluster_list if cluster < len(tracks)]
+final_tracks =
+    [tracks_uri[cluster] for cluster in cluster_list if cluster < len(tracks)]
 # remove dups
 final_tracks_no_dups = list(dict.fromkeys(final_tracks))
 print(json.dumps(final_tracks_no_dups))
