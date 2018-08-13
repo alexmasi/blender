@@ -84,7 +84,6 @@ class App extends Component {
           axios
             .get(`/api/users/${data.email}`)
             .then(response => {
-              console.log(response);
               if (response.data.error) {
                 console.log(`New user: ${data.email}`);
                 axios
@@ -94,7 +93,6 @@ class App extends Component {
                   })
                   .then(response => {
                     console.log(`Added new user: ${data.email}`);
-                    console.log(response);
                   })
                   .catch(error => {
                     console.log(error);
@@ -142,15 +140,13 @@ class App extends Component {
         .then(response => {
           if (!response.data.error) {
             // user exists so get access token from refresh token
-            console.log(`Returning ${name}'s refresh token`);
+            console.log(`Refreshing ${name}'s token`);
             var refresh_token = response.data.refreshToken;
             axios
               .get(`/api/refresh_token/${refresh_token}`)
               .then(response => {
                 // received access token so store it in state
-                console.log(response);
                 var token = response.data.access_token;
-                console.log(`token is: ${token}`);
                 this.setState({
                   all_users: this.state.all_users.concat({
                     user: name,
@@ -160,8 +156,7 @@ class App extends Component {
                 this.setState({
                   all_user_names: this.state.all_user_names.concat(name)
                 });
-                console.log("Updated state!");
-                console.log(this.state);
+                console.log(`Added user ${name}!`);
               })
               .catch(error => {
                 console.log(error);
@@ -276,7 +271,7 @@ class App extends Component {
     axios
       .delete(`/api/users/${this.state.user_data.email}`)
       .then(response => {
-        console.log(response.data.success);
+        console.log("User deleted");
       })
       .catch(error => {
         console.log(error);
@@ -303,63 +298,66 @@ class App extends Component {
         {this.state.loggedIn ? (
           // if logged in then render the main page
           <div className="mainPage">
-            <h1>
+            <h1 className="mainTitle">
               Hello{" "}
               {this.state.user_data.display_name || this.state.user_data.id},
-              welcome to Blender!
+              Welcome to <span className="blend">Blender!</span>
             </h1>
-            <p>
+            <p className="mainText">
               Enter the email addresses of other Spotify users below. When
-              you're ready press Blend! to make a fresh playlist of every users
-              top tracks
+              you're ready press <span className="blendSmall">Blend!</span> to make a fresh playlist of every users
+              top tracks.
             </p>
-            <form onSubmit={e => this.handleSubmit(e)}>
-              <input
-                type="text"
-                value={this.state.other_user}
-                onChange={e => this.handleChange(e)}
-              />
-              <input type="submit" value="Add user to the blender!" />
-            </form>
-            <h2>Users ready to be blended:</h2>
-            <p className="display-linebreak">
-              {this.state.all_user_names.join("\n")}
-            </p>
-            <button
-              className="loginButton"
-              onClick={() => this.handleBlendClick()}
-            >
-              Blend!
-            </button>
-
-            {this.state.ready && (
-              <div>
-                <SpotifyPlayer uri={this.state.playlist_uri} />
-                <p>Playlist added to your library!</p>
+            <section className="container">
+              <div className="left">
+                <form onSubmit={e => this.handleSubmit(e)}>
+                  <input className="inputBar"
+                    type="text"
+                    spellCheck="false"
+                    value={this.state.other_user}
+                    onChange={e => this.handleChange(e)}
+                  />
+                  <input className="inputButton" type="submit" value="Add to Blender" />
+                </form>
+                <h2 className="mainHeader">Users ready to be <span className="blendSmall">Blended:</span></h2>
+                <p className="display-linebreak">
+                  {this.state.all_user_names.join("\n")}
+                </p>
+                <button
+                  className="loginButton"
+                  onClick={() => this.handleBlendClick()}
+                >
+                  Blend!
+                </button>
+                <button
+                  className="loginButton"
+                  onClick={() => this.handleRestartClick()}
+                >
+                  Restart
+                </button>
               </div>
-            )}
+              {this.state.ready && (
+                <div className="right">
+                  <SpotifyPlayer uri={this.state.playlist_uri} />
+                </div>
+              )}
+            </section>
             <button
-              className="loginButton"
-              onClick={() => this.handleRestartClick()}
-            >
-              Restart
-            </button>
-            <button
-              className="loginButton"
+              className="deleteButton"
               onClick={() => this.handleDeleteClick()}
             >
-              Delete my Blender account
+              Unsubscribe from Blender
             </button>
           </div>
         ) : (
           // if not logged in then render the welcome page
           <div className="welcomePage">
-            <h1>Welcome to Blender</h1>
-            <h4>
-              Find an overlap in music taste between a group of users by
-              creating a "blended" playlist using Spotify!
-            </h4>
+            <h1 className="title">Welcome to <span className="blend">Blender</span></h1>
             <LoginButton />
+            <p className="subTitle">
+              Find an overlap in music taste between a group of users
+              by creating a <span className="blend">"blended"</span> playlist using Spotify!
+            </p>
           </div>
         )}
       </div>

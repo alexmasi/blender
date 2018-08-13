@@ -52,8 +52,7 @@ for cluster in cluster_list:
         cluster_list.append(int(Z[prev_cluster, 0]))
         cluster_list.append(int(Z[prev_cluster, 1]))
 
-final_tracks =
-    [tracks_uri[cluster] for cluster in cluster_list if cluster < len(tracks)]
+final_tracks = [tracks_uri[c] for c in cluster_list if c < len(tracks)]
 # remove dups
 final_tracks_no_dups = list(dict.fromkeys(final_tracks))
 print(json.dumps(final_tracks_no_dups))

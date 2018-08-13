@@ -2,4 +2,6 @@ body {
   margin: 1em;
   padding: 1em;
   font-family: system-ui;
+  background-image: url("bananas.png");
+  color: #FFFFFF;
 }
