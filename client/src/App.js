@@ -10,7 +10,9 @@ const spotifyApi = new SpotifyWebApi();
 class LoginButton extends Component {
   handleClick() {
     console.log("User logging in...");
-    window.location = "http://localhost:3001/api/login";
+    window.location = window.location.href.includes('localhost')
+              ? 'http://localhost:3001/api/login'
+              : 'https://spotify-blender.herokuapp.com/api/login'
   }
 
   render() {
@@ -289,7 +291,10 @@ class App extends Component {
       ready: false
     });
     // clear tokens from url
-    window.location = "http://localhost:3000";
+    window.location = window.location.href.includes('localhost')
+              ? 'http://localhost:3000'
+              : 'https://spotify-blender.herokuapp.com'
+
   }
 
   render() {

@@ -212,8 +212,9 @@ router.get("/callback", function(req, res) {
     request.post(authOptions, function(error, response, body) {
       if (!error && response.statusCode === 200) {
         // we pass the token to the browser to make requests from there
+        var uri = process.env.FRONTEND_URI || 'http://localhost:3000'
         res.redirect(
-          "http://localhost:3000/?" +
+          uri + "/?" +
             querystring.stringify({
               access_token: body.access_token,
               refresh_token: body.refresh_token
@@ -221,7 +222,7 @@ router.get("/callback", function(req, res) {
         );
       } else {
         res.redirect(
-          "/?" +
+          uri + "/?" +
             querystring.stringify({
               error: "invalid_token"
             })
