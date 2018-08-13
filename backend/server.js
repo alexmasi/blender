@@ -263,7 +263,7 @@ router.get("/refresh_token/:token", (req, res) => {
 router.post("/blend", (req, res) => {
   var options = {
     mode: "json",
-    pythonPath: "/usr/local/bin/python3",
+    // pythonPath: "/usr/local/bin/python3",
     // pythonOptions: ['-u'], // get print results in real-time
     // scriptPath: 'path/to/my/scripts',
     args: [req.body.song_data]

@@ -4,7 +4,7 @@ import json
 # from sklearn.cluster import AgglomerativeClustering
 # import numpy as np
 from scipy.cluster.hierarchy import dendrogram, linkage
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 
 json_string = sys.argv[1]
