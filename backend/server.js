@@ -7,6 +7,7 @@ var cors = require("cors");
 var querystring = require("querystring");
 var cookieParser = require("cookie-parser");
 var PythonShell = require("python-shell");
+var path = require("path");
 
 // create our instances
 const app = express();
@@ -73,7 +74,12 @@ app.use(cookieParser());
 
 // INIT API
 
+// serve static react
+
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+
 // Use our router configuration when we call /api
+
 app.use("/api", router);
 
 router.get("/", (req, res) => {

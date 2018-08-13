@@ -6,7 +6,9 @@
   "scripts": {
     "start:server": "cd backend && nodemon server.js",
     "start:client": "cd client && npm start",
-    "start:dev": "concurrently --kill-others-on-fail \"npm run start:server\" \"npm run start:client\""
+    "start:dev": "concurrently --kill-others-on-fail \"npm run start:server\" \"npm run start:client\"",
+    "heroku-postbuild": "cd client && npm install && npm run build",
+    "start": "cd backend && node server.js"
   },
   "author": "",
   "license": "MIT",
