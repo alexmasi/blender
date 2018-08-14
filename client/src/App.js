@@ -214,55 +214,61 @@ class App extends Component {
   }
 
   handleBlendClick() {
-    console.log("Blending users: " + this.state.all_user_names.join(", "));
-    var users_processed = 0;
-    var no_top_tracks = false;
-    this.state.all_users.forEach(entry => {
-      spotifyApi.setAccessToken(entry.token);
-      // get top tracks
-      spotifyApi
-        .getMyTopTracks({
-          limit: this.state.num_samples,
-          time_range: this.state.term
-        })
-        .then(data => {
-          if (!data.items.length) {
-            no_top_tracks = true;
-          }
-          return data.items.map(t => {
-            return t.id;
-          });
-        })
-        .then(trackIds => {
-          return spotifyApi.getAudioFeaturesForTracks(trackIds);
-        })
-        .then(tracksInfo => {
-          this.setState({
-            song_list: this.state.song_list.concat({
-              user: entry.user,
-              songs: tracksInfo.audio_features
-            })
-          });
-        })
-        .then(() => {
-          if (++users_processed === this.state.all_users.length) {
-            if (no_top_tracks) {
-              console.log(
-                `A user you added to the blender has no top tracks on Spotify, try again`
-              );
-              alert(`A user you added to the blender has no top tracks on Spotify, try again`);
-              this.handleRestartClick()
+    if (this.state.ready) {
+      console.log("Click restart to blend again!");
+      alert("Click restart to blend again!");
+    } else {
+      console.log("Blending users: " + this.state.all_user_names.join(", "));
+      var users_processed = 0;
+      var no_top_tracks = false;
+      this.state.all_users.forEach(entry => {
+        spotifyApi.setAccessToken(entry.token);
+        // get top tracks
+        spotifyApi
+          .getMyTopTracks({
+            limit: this.state.num_samples,
+            time_range: this.state.term
+          })
+          .then(data => {
+            if (!data.items.length) {
+              no_top_tracks = true;
             }
-            else {
-              // call backend method to run python script
-              this.callPythonScript();
+            return data.items.map(t => {
+              return t.id;
+            });
+          })
+          .then(trackIds => {
+            return spotifyApi.getAudioFeaturesForTracks(trackIds);
+          })
+          .then(tracksInfo => {
+            this.setState({
+              song_list: this.state.song_list.concat({
+                user: entry.user,
+                songs: tracksInfo.audio_features
+              })
+            });
+          })
+          .then(() => {
+            if (++users_processed === this.state.all_users.length) {
+              // check if a user has no top tracks and handle
+              if (no_top_tracks) {
+                console.log(
+                  `A user you added to the blender has no top tracks on Spotify, try again`
+                );
+                alert(`A user you added to the blender has no top tracks on Spotify, try again`);
+                this.handleRestartClick()
+              }
+              else {
+                // call backend method to run python script
+                this.callPythonScript();
+              }
             }
-          }
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    });
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      });
+    }
   }
 
   handleRestartClick() {
