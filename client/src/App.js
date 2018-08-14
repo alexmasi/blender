@@ -61,7 +61,7 @@ class App extends Component {
       playlist_uri: "",
       playlist_id: "",
       term: "medium_term",
-      num_samples: 30
+      num_samples: 20
     };
   }
 
@@ -313,7 +313,14 @@ class App extends Component {
     window.location = window.location.href.includes('localhost')
               ? 'http://localhost:3000'
               : 'https://spotify-blender.herokuapp.com'
+  }
 
+  handleSelectTerm(event) {
+    this.setState({term: event.target.value});
+  }
+
+  handleSelectNum(event) {
+    this.setState({num_samples: event.target.value});
   }
 
   render() {
@@ -347,18 +354,42 @@ class App extends Component {
                 <p className="display-linebreak">
                   {this.state.all_user_names.join("\n")}
                 </p>
-                <button
-                  className="loginButton"
-                  onClick={() => this.handleBlendClick()}
-                >
-                  Blend!
-                </button>
-                <button
-                  className="loginButton"
-                  onClick={() => this.handleRestartClick()}
-                >
-                  Restart
-                </button>
+                <div>
+                  <label className="dropLabel">
+                    Pick the time range Blender should use:
+                    <select className="dropDown" value={this.state.term} onChange={e => this.handleSelectTerm(e)}>
+                      <option value="short_term">Last Month</option>
+                      <option value="medium_term">Last 6 Months</option>
+                      <option value="long_term">Last 3 Years</option>
+                    </select>
+                  </label>
+                </div>
+                <div>
+                  <label className="dropLabel">
+                    Pick the number of samples from each user:
+                    <select className="dropDown" value={this.state.num_samples} onChange={e => this.handleSelectNum(e)}>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="25">25</option>
+                      <option value="30">30</option>
+                    </select>
+                  </label>
+                </div>
+                <div>
+                  <button
+                    className="blendButton"
+                    onClick={() => this.handleBlendClick()}
+                  >
+                    Blend!
+                  </button>
+                  <button
+                    className="blendButton"
+                    onClick={() => this.handleRestartClick()}
+                  >
+                    Restart
+                  </button>
+                </div>
               </div>
               {this.state.ready && (
                 <div className="right">
