@@ -226,7 +226,7 @@ class App extends Component {
           time_range: this.state.term
         })
         .then(data => {
-          if (!data.items) {
+          if (data.items.length) {
             no_top_tracks = true;
           }
           return data.items.map(t => {
