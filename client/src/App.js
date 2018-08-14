@@ -245,16 +245,18 @@ class App extends Component {
           });
         })
         .then(() => {
-          if (no_top_tracks) {
-            console.log(
-              `${entry.user} has no top tracks on Spotify, try another user`
-            );
-            alert(`${entry.user} has no top tracks on Spotify, try another user`);
-            this.handleRestartClick()
-          }
-          else if (++users_processed === this.state.all_users.length) {
-            // call backend method to run python script
-            this.callPythonScript();
+          if (++users_processed === this.state.all_users.length) {
+            if (no_top_tracks) {
+              console.log(
+                `A user you added to the blender has no top tracks on Spotify, try again`
+              );
+              alert(`A user you added to the blender has no top tracks on Spotify, try again`);
+              this.handleRestartClick()
+            }
+            else {
+              // call backend method to run python script
+              this.callPythonScript();
+            }
           }
         })
         .catch(error => {
