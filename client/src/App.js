@@ -216,6 +216,7 @@ class App extends Component {
   handleBlendClick() {
     console.log("Blending users: " + this.state.all_user_names.join(", "));
     var users_processed = 0;
+    var no_top_tracks = false;
     this.state.all_users.forEach(entry => {
       spotifyApi.setAccessToken(entry.token);
       // get top tracks
@@ -225,6 +226,9 @@ class App extends Component {
           time_range: this.state.term
         })
         .then(data => {
+          if (!data.items) {
+            no_top_tracks = true;
+          }
           return data.items.map(t => {
             return t.id;
           });
@@ -241,6 +245,13 @@ class App extends Component {
           });
         })
         .then(() => {
+          if (no_top_tracks) {
+            console.log(
+              `${entry.user} has no top tracks on Spotify, try another user`
+            );
+            alert(`${entry.user} has no top tracks on Spotify, try another user`);
+            this.handleRestartClick()
+          }
           if (++users_processed === this.state.all_users.length) {
             // call backend method to run python script
             this.callPythonScript();
