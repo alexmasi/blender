@@ -252,7 +252,7 @@ class App extends Component {
             alert(`${entry.user} has no top tracks on Spotify, try another user`);
             this.handleRestartClick()
           }
-          if (++users_processed === this.state.all_users.length) {
+          else if (++users_processed === this.state.all_users.length) {
             // call backend method to run python script
             this.callPythonScript();
           }
