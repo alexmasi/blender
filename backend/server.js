@@ -277,4 +277,21 @@ router.post("/blend", (req, res) => {
   });
 });
 
+router.post("/party", (req, res) => {
+  var options = {
+    mode: "json",
+    // pythonPath: "/usr/local/bin/python3",
+    // pythonOptions: ['-u'], // get print results in real-time
+    // scriptPath: 'path/to/my/scripts',
+    args: [req.body.song_data]
+  };
+
+  PythonShell.run("party.py", options, function(err, results) {
+    if (err) throw err;
+    // results is an array consisting of messages collected during execution
+    console.log("uris: %j", results);
+    res.json({ uris: results });
+  });
+});
+
 app.listen(API_PORT, () => console.log(`Listening on port ${API_PORT}`));

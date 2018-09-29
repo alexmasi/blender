@@ -1,15 +1,14 @@
 import sys
 import json
-# import matplotlib.pyplot as plt
-# from sklearn.cluster import AgglomerativeClustering
-# import numpy as np
 from scipy.cluster.hierarchy import dendrogram, linkage
-# from matplotlib import pyplot as plt
 
-
-json_string = sys.argv[1]
-# with open('./three_users.txt') as infile:
-#     json_string = infile.read().strip("'\n")
+try:
+    # called from backend
+    json_string = sys.argv[1]
+except IndexError:
+    # used for testing
+    with open('./two_users.txt') as infile:
+        json_string = infile.read().strip("'\n")
 
 song_list = json.loads(json_string)
 
@@ -21,7 +20,7 @@ for user in song_list:
         tracks.append([
             song['danceability'],
             song['energy'],
-            # song['key'],
+            # song['key'], (hurts clustering)
             song['loudness'],
             song['mode'],
             song['speechiness'],
@@ -40,11 +39,6 @@ for i in range(len(tracks)-1):
         cluster_list.append(int(Z[i, 0]))
         cluster_list.append(int(Z[i, 1]))
         break
-
-
-# fig = plt.figure(figsize=(15, 5))
-# dn = dendrogram(Z, labels=tracks_uri)
-# plt.show()
 
 for cluster in cluster_list:
     if cluster >= len(tracks):
