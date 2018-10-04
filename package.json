@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "https://spotify-blender.herokuapp.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexmasi/blender"
+  },
   "scripts": {
     "start:server": "cd backend && nodemon server.js",
     "start:client": "cd client && npm start",
@@ -10,20 +15,20 @@
     "heroku-postbuild": "cd client && npm install && npm run build",
     "start": "cd backend && node server.js"
   },
-  "author": "",
+  "author": "Alex Masi",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.2",
     "concurrently": "^3.6.1",
-    "express": "^4.16.3",
-    "mongoose": "^5.0.16",
-    "morgan": "^1.9.0",
-    "nodemon": "^1.17.3",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "mongoose": "^5.3.1",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.18.4",
+    "python-shell": "^1.0.4",
     "querystring": "~0.2.0",
     "request": "~2.83.0",
-    "spotify-web-api-node": "^3.1.1",
-    "python-shell": "^1.0.4"
+    "spotify-web-api-node": "^4.0.0"
   }
 }
