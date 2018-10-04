@@ -61,7 +61,8 @@ class App extends Component {
       playlist_uri: "",
       playlist_id: "",
       term: "medium_term",
-      num_samples: 20
+      num_samples: 20,
+      party: false
     };
   }
 
@@ -185,7 +186,7 @@ class App extends Component {
       .createPlaylist(this.state.user_data.id, {
         name: `Blender: ${this.state.all_user_names.join(", ")} [${
           this.state.term
-        }, ${this.state.num_samples} samples]`,
+        }, ${this.state.num_samples} samples, Party Mode: ${this.state.party}]`,
         description: "Playlist created by Blender for Spotify"
       })
       .then(playlist => {
@@ -193,9 +194,15 @@ class App extends Component {
         this.setState({ playlist_id: playlist.id });
       })
       .then(() => {
-        return axios.post("/api/blend", {
-          song_data: JSON.stringify(this.state.song_list)
-        });
+        if (this.state.party) {
+          return axios.post("/api/party", {
+            song_data: JSON.stringify(this.state.song_list)
+          });
+        } else {
+          return axios.post("/api/blend", {
+            song_data: JSON.stringify(this.state.song_list)
+          });
+        }
       })
       .then(response => {
         return spotifyApi.addTracksToPlaylist(
@@ -323,6 +330,10 @@ class App extends Component {
     this.setState({num_samples: event.target.value});
   }
 
+  handleCheckParty() {
+    this.setState({party: !this.state.party});
+  }
+
   render() {
     return (
       <div>
@@ -374,6 +385,12 @@ class App extends Component {
                       <option value="25">25</option>
                       <option value="30">30</option>
                     </select>
+                  </label>
+                </div>
+                <div>
+                  <label className="dropLabel">
+                    Use Party Mode:
+                    <input type="checkbox" onChange={() => this.handleCheckParty()} checked={this.state.party}/>
                   </label>
                 </div>
                 <div>
